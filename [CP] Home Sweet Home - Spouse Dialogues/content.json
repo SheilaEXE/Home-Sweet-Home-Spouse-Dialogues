@@ -1,0 +1,10 @@
+{
+  "Format": "2.9.0",
+  "Changes": [
+    {
+      "LogName": "Bebidas geladas",
+      "Action": "Include",
+      "FromFile": "code/drinks/drinks.json"
+    }
+  ]
+}
