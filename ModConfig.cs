@@ -1,8 +1,14 @@
+using StardewModdingAPI;
+using StardewModdingAPI.Utilities;
+
 namespace HomeSweetHomeSpouseDialogues
 {
     public class ModConfig
     {
         public bool EnableMod { get; set; } = true;
+
+        /// <summary>Tecla usada para encher um copo de água nas pias.</summary>
+        public KeybindList GetWaterFromSinkButton { get; set; } = new(SButton.F);
 
         // Mesmo horário que estava no Attentive Spouse.
         public int DayDialogueStartTime { get; set; } = 1400;

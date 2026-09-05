@@ -94,6 +94,30 @@
       "Action": "Load",
       "Target": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
       "FromFile": "assets/Objects.png"
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Shops",
+      "TargetField": [ "SeedShop", "Items" ],
+      "Entries": {
+        "NatrollEXE_HomeSweetHome_IcedWaterBottle_Pierre": {
+          "Id": "NatrollEXE_HomeSweetHome_IcedWaterBottle_Pierre",
+          "ItemId": "(O)SiL.IcedWaterBottle",
+          "Price": 50
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "Data/Shops",
+      "TargetField": [ "Saloon", "Items" ],
+      "Entries": {
+        "NatrollEXE_HomeSweetHome_IcedWaterBottle_Gus": {
+          "Id": "NatrollEXE_HomeSweetHome_IcedWaterBottle_Gus",
+          "ItemId": "(O)SiL.IcedWaterBottle",
+          "Price": 50
+        }
+      }
     }
   ]
 }

@@ -25,11 +25,31 @@ namespace HomeSweetHomeSpouseDialogues
         public override void Entry(IModHelper helper)
         {
             Config = helper.ReadConfig<ModConfig>();
+            helper.Events.GameLoop.GameLaunched += OnGameLaunched;
             helper.Events.GameLoop.SaveLoaded += OnSaveLoaded;
             helper.Events.GameLoop.DayStarted += OnDayStarted;
             helper.Events.GameLoop.UpdateTicked += OnUpdateTicked;
             helper.Events.GameLoop.ReturnedToTitle += OnReturnedToTitle;
             helper.Events.Input.ButtonPressed += OnButtonPressed;
+        }
+
+        private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
+        {
+            IGenericModConfigMenuApi configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
+            if (configMenu == null)
+                return;
+
+            configMenu.Register(
+                ModManifest,
+                reset: () => Config = new ModConfig(),
+                save: () => Helper.WriteConfig(Config));
+
+            configMenu.AddKeybindList(
+                ModManifest,
+                getValue: () => Config.GetWaterFromSinkButton,
+                setValue: value => Config.GetWaterFromSinkButton = value,
+                name: () => GetText("config.get-water-from-sink.name", "Pegar copo de água"),
+                tooltip: () => GetText("config.get-water-from-sink.description", "Fique de frente para uma pia e pressione esta tecla para encher um copo de água gelada."));
         }
 
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
@@ -77,7 +97,16 @@ namespace HomeSweetHomeSpouseDialogues
 
         private void OnButtonPressed(object sender, ButtonPressedEventArgs e)
         {
-            if (!Context.IsWorldReady || !Config.EnableMod || !e.Button.IsActionButton())
+            if (!Context.IsWorldReady || !Config.EnableMod)
+                return;
+
+            if (Config.GetWaterFromSinkButton.JustPressed())
+            {
+                TryGetWaterFromSink();
+                return;
+            }
+
+            if (!e.Button.IsActionButton())
                 return;
 
             NPC spouse = GetSpouse();
@@ -90,6 +119,59 @@ namespace HomeSweetHomeSpouseDialogues
             // Once the player interacts with their spouse, allow the later time slot to queue.
             if (manualDialogueQueuedToday)
                 manualDialogueQueuedToday = false;
+        }
+
+        /// <summary>Gives the player an unlimited water cup when facing a vanilla-recognized sink.</summary>
+        private void TryGetWaterFromSink()
+        {
+            if (Game1.player == null || !Game1.player.canMove || Game1.dialogueUp || Game1.activeClickableMenu != null)
+                return;
+
+            Vector2 sinkTile = GetTileInFrontOf(Game1.player);
+            if (!IsSink(Game1.currentLocation, sinkTile))
+                return;
+
+            if (Game1.player.isInventoryFull())
+            {
+                Game1.showRedMessage(GetText("message.inventory-full", "Sua bolsa está cheia."));
+                return;
+            }
+
+            try
+            {
+                Item waterCup = ItemRegistry.Create("(O)SiL.IcedWaterCup");
+                Game1.player.addItemToInventoryBool(waterCup);
+                Game1.player.holdUpItemThenMessage(waterCup);
+                Game1.playSound("slosh");
+            }
+            catch (Exception ex)
+            {
+                Monitor.Log($"Couldn't create the water cup from a sink: {ex.Message}", LogLevel.Warn);
+            }
+        }
+
+        private static Vector2 GetTileInFrontOf(Farmer farmer)
+        {
+            Vector2 tile = farmer.Tile;
+            return farmer.FacingDirection switch
+            {
+                Game1.up => tile + new Vector2(0, -1),
+                Game1.right => tile + new Vector2(1, 0),
+                Game1.down => tile + new Vector2(0, 1),
+                Game1.left => tile + new Vector2(-1, 0),
+                _ => tile,
+            };
+        }
+
+        private static bool IsSink(GameLocation location, Vector2 tile)
+        {
+            if (location == null || location.IsOutdoors)
+                return false;
+
+            int x = (int)tile.X;
+            int y = (int)tile.Y;
+            return location.doesTileHaveProperty(x, y, "Action", "Buildings") == "kitchen"
+                || location.CanRefillWateringCanOnTile(x, y);
         }
 
         private bool TryQueueSeasonalSpouseDialogue(NPC spouse)
@@ -374,6 +456,12 @@ namespace HomeSweetHomeSpouseDialogues
         private static float DistanceToPlayer(NPC npc)
         {
             return npc == null || Game1.player == null ? float.MaxValue : Vector2.Distance(npc.Position, Game1.player.Position);
+        }
+
+        private string GetText(string key, string fallback)
+        {
+            var translation = Helper.Translation.Get(key);
+            return translation.HasValue() ? translation.ToString() : fallback;
         }
     }
 }
