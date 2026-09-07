@@ -4,13 +4,17 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using System;
 using System.Collections.Generic;
+using TileMarker.Api;
 
 namespace HomeSweetHomeSpouseDialogues
 {
     /// <summary>Queues this mod's dialogue separately from the game's marriage-dialogue asset.</summary>
     public sealed class ModEntry : Mod
     {
+        private const string WaterSinkTileMarkerCategory = "WaterSinks";
+
         private ModConfig Config;
+        private ITileMarkerApi tileMarkerApi;
         private readonly Random random = new();
         private readonly Dictionary<string, HashSet<int>> usedDialogueIds = new();
 
@@ -36,20 +40,26 @@ namespace HomeSweetHomeSpouseDialogues
         private void OnGameLaunched(object sender, GameLaunchedEventArgs e)
         {
             IGenericModConfigMenuApi configMenu = Helper.ModRegistry.GetApi<IGenericModConfigMenuApi>("spacechase0.GenericModConfigMenu");
-            if (configMenu == null)
-                return;
+            if (configMenu != null)
+            {
+                configMenu.Register(
+                    ModManifest,
+                    reset: () => Config = new ModConfig(),
+                    save: () => Helper.WriteConfig(Config));
 
-            configMenu.Register(
-                ModManifest,
-                reset: () => Config = new ModConfig(),
-                save: () => Helper.WriteConfig(Config));
+                configMenu.AddKeybindList(
+                    ModManifest,
+                    getValue: () => Config.GetWaterFromSinkButton,
+                    setValue: value => Config.GetWaterFromSinkButton = value,
+                    name: () => GetText("config.get-water-from-sink.name", "Pegar copo de água"),
+                    tooltip: () => GetText("config.get-water-from-sink.description", "Fique de frente para uma pia e pressione esta tecla para encher um copo de água gelada."));
+            }
 
-            configMenu.AddKeybindList(
-                ModManifest,
-                getValue: () => Config.GetWaterFromSinkButton,
-                setValue: value => Config.GetWaterFromSinkButton = value,
-                name: () => GetText("config.get-water-from-sink.name", "Pegar copo de água"),
-                tooltip: () => GetText("config.get-water-from-sink.description", "Fique de frente para uma pia e pressione esta tecla para encher um copo de água gelada."));
+            tileMarkerApi = Helper.ModRegistry.GetApi<ITileMarkerApi>("NatrollEXE.TileMarker");
+            tileMarkerApi?.RegisterCategory(
+                ModManifest.UniqueID,
+                WaterSinkTileMarkerCategory,
+                GetText("tile-marker.water-sinks", "Pias de água"));
         }
 
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
@@ -121,7 +131,7 @@ namespace HomeSweetHomeSpouseDialogues
                 manualDialogueQueuedToday = false;
         }
 
-        /// <summary>Gives the player an unlimited water cup when facing a vanilla-recognized sink.</summary>
+        /// <summary>Gives the player an unlimited water cup when facing a vanilla or Tile Marker sink.</summary>
         private void TryGetWaterFromSink()
         {
             if (Game1.player == null || !Game1.player.canMove || Game1.dialogueUp || Game1.activeClickableMenu != null)
@@ -163,13 +173,19 @@ namespace HomeSweetHomeSpouseDialogues
             };
         }
 
-        private static bool IsSink(GameLocation location, Vector2 tile)
+        private bool IsSink(GameLocation location, Vector2 tile)
         {
-            if (location == null || location.IsOutdoors)
+            if (location == null)
                 return false;
 
             int x = (int)tile.X;
             int y = (int)tile.Y;
+            if (tileMarkerApi?.IsTileMarked(ModManifest.UniqueID, WaterSinkTileMarkerCategory, location, x, y) == true)
+                return true;
+
+            if (location.IsOutdoors)
+                return false;
+
             return location.doesTileHaveProperty(x, y, "Action", "Buildings") == "kitchen"
                 || location.CanRefillWateringCanOnTile(x, y);
         }

@@ -2,6 +2,7 @@
 
   "config.get-water-from-sink.name": "Pegar copo de água",
   "config.get-water-from-sink.description": "Fique de frente para uma pia e pressione esta tecla para encher um copo de água gelada.",
+  "tile-marker.water-sinks": "Pias de água",
   "message.inventory-full": "Sua bolsa está cheia.",
 
 //===============================================================================================================================================================//
