@@ -7,8 +7,8 @@ namespace HomeSweetHomeSpouseDialogues
     {
         public bool EnableMod { get; set; } = true;
 
-        /// <summary>Tecla usada para encher um copo de água nas pias.</summary>
-        public KeybindList GetWaterFromSinkButton { get; set; } = new(SButton.F);
+        // Exposed to Content Patcher as a token; the sink interaction itself remains in the CP pack.
+        public KeybindList WaterSinkButton { get; set; } = new(SButton.D5);
 
         // Mesmo horário que estava no Attentive Spouse.
         public int DayDialogueStartTime { get; set; } = 1400;

@@ -4,17 +4,13 @@ using StardewModdingAPI.Events;
 using StardewValley;
 using System;
 using System.Collections.Generic;
-using TileMarker.Api;
 
 namespace HomeSweetHomeSpouseDialogues
 {
     /// <summary>Queues this mod's dialogue separately from the game's marriage-dialogue asset.</summary>
     public sealed class ModEntry : Mod
     {
-        private const string WaterSinkTileMarkerCategory = "WaterSinks";
-
         private ModConfig Config;
-        private ITileMarkerApi tileMarkerApi;
         private readonly Random random = new();
         private readonly Dictionary<string, HashSet<int>> usedDialogueIds = new();
 
@@ -49,17 +45,17 @@ namespace HomeSweetHomeSpouseDialogues
 
                 configMenu.AddKeybindList(
                     ModManifest,
-                    getValue: () => Config.GetWaterFromSinkButton,
-                    setValue: value => Config.GetWaterFromSinkButton = value,
-                    name: () => GetText("config.get-water-from-sink.name", "Pegar copo de água"),
-                    tooltip: () => GetText("config.get-water-from-sink.description", "Fique de frente para uma pia e pressione esta tecla para encher um copo de água gelada."));
+                    getValue: () => Config.WaterSinkButton,
+                    setValue: value => Config.WaterSinkButton = value,
+                    name: () => Helper.Translation.Get("config.water-sink-button.name").ToString(),
+                    tooltip: () => Helper.Translation.Get("config.water-sink-button.description").ToString());
             }
 
-            tileMarkerApi = Helper.ModRegistry.GetApi<ITileMarkerApi>("NatrollEXE.TileMarker");
-            tileMarkerApi?.RegisterCategory(
-                ModManifest.UniqueID,
-                WaterSinkTileMarkerCategory,
-                GetText("tile-marker.water-sinks", "Pias de água"));
+            IContentPatcherApi contentPatcher = Helper.ModRegistry.GetApi<IContentPatcherApi>("Pathoschild.ContentPatcher");
+            contentPatcher?.RegisterToken(
+                ModManifest,
+                "WaterSinkButton",
+                () => new[] { Config.WaterSinkButton?.ToString() ?? "D5" });
         }
 
         private void OnSaveLoaded(object sender, SaveLoadedEventArgs e)
@@ -110,12 +106,6 @@ namespace HomeSweetHomeSpouseDialogues
             if (!Context.IsWorldReady || !Config.EnableMod)
                 return;
 
-            if (Config.GetWaterFromSinkButton.JustPressed())
-            {
-                TryGetWaterFromSink();
-                return;
-            }
-
             if (!e.Button.IsActionButton())
                 return;
 
@@ -129,65 +119,6 @@ namespace HomeSweetHomeSpouseDialogues
             // Once the player interacts with their spouse, allow the later time slot to queue.
             if (manualDialogueQueuedToday)
                 manualDialogueQueuedToday = false;
-        }
-
-        /// <summary>Gives the player an unlimited water cup when facing a vanilla or Tile Marker sink.</summary>
-        private void TryGetWaterFromSink()
-        {
-            if (Game1.player == null || !Game1.player.canMove || Game1.dialogueUp || Game1.activeClickableMenu != null)
-                return;
-
-            Vector2 sinkTile = GetTileInFrontOf(Game1.player);
-            if (!IsSink(Game1.currentLocation, sinkTile))
-                return;
-
-            if (Game1.player.isInventoryFull())
-            {
-                Game1.showRedMessage(GetText("message.inventory-full", "Sua bolsa está cheia."));
-                return;
-            }
-
-            try
-            {
-                Item waterCup = ItemRegistry.Create("(O)SiL.IcedWaterCup");
-                Game1.player.addItemToInventoryBool(waterCup);
-                Game1.player.holdUpItemThenMessage(waterCup);
-                Game1.playSound("slosh");
-            }
-            catch (Exception ex)
-            {
-                Monitor.Log($"Couldn't create the water cup from a sink: {ex.Message}", LogLevel.Warn);
-            }
-        }
-
-        private static Vector2 GetTileInFrontOf(Farmer farmer)
-        {
-            Vector2 tile = farmer.Tile;
-            return farmer.FacingDirection switch
-            {
-                Game1.up => tile + new Vector2(0, -1),
-                Game1.right => tile + new Vector2(1, 0),
-                Game1.down => tile + new Vector2(0, 1),
-                Game1.left => tile + new Vector2(-1, 0),
-                _ => tile,
-            };
-        }
-
-        private bool IsSink(GameLocation location, Vector2 tile)
-        {
-            if (location == null)
-                return false;
-
-            int x = (int)tile.X;
-            int y = (int)tile.Y;
-            if (tileMarkerApi?.IsTileMarked(ModManifest.UniqueID, WaterSinkTileMarkerCategory, location, x, y) == true)
-                return true;
-
-            if (location.IsOutdoors)
-                return false;
-
-            return location.doesTileHaveProperty(x, y, "Action", "Buildings") == "kitchen"
-                || location.CanRefillWateringCanOnTile(x, y);
         }
 
         private bool TryQueueSeasonalSpouseDialogue(NPC spouse)
@@ -474,10 +405,5 @@ namespace HomeSweetHomeSpouseDialogues
             return npc == null || Game1.player == null ? float.MaxValue : Vector2.Distance(npc.Position, Game1.player.Position);
         }
 
-        private string GetText(string key, string fallback)
-        {
-            var translation = Helper.Translation.Get(key);
-            return translation.HasValue() ? translation.ToString() : fallback;
-        }
     }
 }

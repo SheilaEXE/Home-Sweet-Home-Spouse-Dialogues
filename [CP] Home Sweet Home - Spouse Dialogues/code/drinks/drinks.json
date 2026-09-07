@@ -13,7 +13,7 @@
           "Price": 80,
           "Texture": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
           "SpriteIndex": 0,
-          "Edibility": 25,
+          "Edibility": 10,
           "IsDrink": true
         },
         "SiL.IcedWaterBottle": {
@@ -25,7 +25,7 @@
           "Price": 120,
           "Texture": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
           "SpriteIndex": 1,
-          "Edibility": 50,
+          "Edibility": 25,
           "IsDrink": true
         },
         "SiL.IcedCoffeeCup": {
@@ -37,7 +37,7 @@
           "Price": 180,
           "Texture": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
           "SpriteIndex": 2,
-          "Edibility": 40,
+          "Edibility": 15,
           "IsDrink": true
         },
         "SiL.CreamCoffeeCup": {
@@ -49,7 +49,7 @@
           "Price": 220,
           "Texture": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
           "SpriteIndex": 3,
-          "Edibility": 45,
+          "Edibility": 25,
           "IsDrink": true
         },
         "SiL.HomemadeShake": {
@@ -61,7 +61,7 @@
           "Price": 200,
           "Texture": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
           "SpriteIndex": 4,
-          "Edibility": 60,
+          "Edibility": 40,
           "IsDrink": true
         },
         "SiL.RedBerryShake": {
@@ -73,7 +73,7 @@
           "Price": 230,
           "Texture": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
           "SpriteIndex": 5,
-          "Edibility": 65,
+          "Edibility": 40,
           "IsDrink": true
         },
         "SiL.BlackberryShake": {
@@ -85,7 +85,7 @@
           "Price": 240,
           "Texture": "Mods/NatrollEXE.HomeSweetHomeSpouseDialogues.ContentPack/Objects",
           "SpriteIndex": 6,
-          "Edibility": 68,
+          "Edibility": 40,
           "IsDrink": true
         }
       }

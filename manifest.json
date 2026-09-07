@@ -15,11 +15,6 @@
     {
       "UniqueID": "spacechase0.GenericModConfigMenu",
       "IsRequired": false
-    },
-    {
-      "UniqueID": "NatrollEXE.TileMarker",
-      "MinimumVersion": "1.0.4",
-      "IsRequired": false
     }
   ]
 }

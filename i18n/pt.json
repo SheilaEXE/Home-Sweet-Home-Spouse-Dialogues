@@ -1,10 +1,6 @@
 {
-
-  "config.get-water-from-sink.name": "Pegar copo de água",
-  "config.get-water-from-sink.description": "Fique de frente para uma pia e pressione esta tecla para encher um copo de água gelada.",
-  "tile-marker.water-sinks": "Pias de água",
-  "message.inventory-full": "Sua bolsa está cheia.",
-
+  "config.water-sink-button.name": "Tecla para pegar água",
+  "config.water-sink-button.description": "Clique nesta opção e pressione qualquer tecla, botão do mouse ou controle para pegar água em uma pia marcada.",
 //===============================================================================================================================================================//
 // HOME DAY DIALOGUES
 //===============================================================================================================================================================//

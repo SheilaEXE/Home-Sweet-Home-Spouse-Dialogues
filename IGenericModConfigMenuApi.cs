@@ -1,10 +1,10 @@
+using System;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
-using System;
 
 namespace HomeSweetHomeSpouseDialogues
 {
-    /// <summary>Minimal API surface used when Generic Mod Config Menu is installed.</summary>
+    /// <summary>Minimal Generic Mod Config Menu API surface used by this mod.</summary>
     public interface IGenericModConfigMenuApi
     {
         void Register(IManifest mod, Action reset, Action save, bool titleScreenOnly = false);
